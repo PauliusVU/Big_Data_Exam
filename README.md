@@ -42,7 +42,7 @@ The remaining scripts were written for exploratory analysis, debugging, and iter
 | `PySpark_Phase_1.py` | Intermediate PySpark Phase 1 before Docker refactor |
 | `PySpark_Phase_1_1_day_test.py` | Single-day subset test for rapid iteration |
 | `collision_phase_2_v3.py` | Iterative version of Phase 2 collision verification |
-| `collision_inspection_Claude_v2.py` | Deep inspection of individual collision candidates |
+| `collision_inspection__v2.py` | Deep inspection of individual collision candidates |
 | `audit_sog_imputation.py` | Audit of speed-over-ground (SOG) imputation quality |
 | `inspect_missing_sog.py` | Investigation of missing SOG values in raw AIS data |
 | `inspect_crash_date.py` | Date-range sanity checks on the crash events |
