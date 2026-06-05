@@ -72,40 +72,22 @@ The remaining scripts were written for exploratory analysis, debugging, and iter
 
 ---
 
-## Running the Pipeline
+## Docker Image
 
-```bash
-docker compose up
-```
-
-Outputs are written to `./outputs/`.
+The prebuilt image is publicly available on Docker Hub: https://hub.docker.com/r/pauliusvu/ais-collision-detection
 
 ---
 
-## Tuning for Your Machine
+## Running the Pipeline
 
-Spark cores and driver memory are exposed as environment variables in
-`docker-compose.yml`, so the same image runs on a small laptop or a larger
-workstation without editing any code:
+1. Place the three data files in a `data/` directory (see Requirements).
+2. Pull the image:
 
-```yaml
-environment:
-  - SPARK_CORES=4        # number of Spark cores
-  - SPARK_DRIVER_MEM=4g  # Spark driver heap
-deploy:
-  resources:
-    limits:
-      memory: 8g         # container memory ceiling
+```bash
+docker pull pauliusvu/ais-collision-detection:v1.0
 ```
 
-Defaults (`4` cores, `4g` driver, `8g` container) match the tested configuration.
-On a larger machine, raise these for more speed. On a smaller one, the pipeline
-still runs but more slowly; if Spark reports an out-of-memory error, lower
-`SPARK_DRIVER_MEM` to `3g`.
-
-If you run the image directly with `docker run` instead of `docker compose up`
-(for example, after pulling from Docker Hub without the compose file), pass the
-same settings as flags:
+3. From the directory containing `data/`, run:
 
 ```bash
 docker run \
@@ -119,12 +101,46 @@ docker run \
   pauliusvu/ais-collision-detection:v1.0
 ```
 
+Results are written to `./outputs/` (candidate list, confirmed collisions, per-incident telemetry, and trajectory maps).
+
+Alternatively, from the repository root with the data files in place, `docker compose up` runs the same pipeline using the settings in `docker-compose.yml`.
+
+**Architecture note.** The prebuilt image is **linux/arm64** (built on Apple Silicon). On an Intel/AMD (x86-64) machine, build locally instead of pulling, then run the same command with the local image name `ais-collision-detection`:
+
+```bash
+docker build -t ais-collision-detection .
+docker run \
+  -e SPARK_CORES=4 \
+  -e SPARK_DRIVER_MEM=4g \
+  -e OUTPUT_DIR=/app/outputs \
+  --memory=8g \
+  --shm-size=2g \
+  -v "$(pwd)/data:/app/data" \
+  -v "$(pwd)/outputs:/app/outputs" \
+  ais-collision-detection
+```
+
+---
+
+## Tuning for Your Machine
+
+Spark cores and driver memory are exposed as environment variables in `docker-compose.yml`, so the same image runs on a small laptop or a larger workstation without editing any code:
+
+```yaml
+environment:
+  - SPARK_CORES=4        # number of Spark cores
+  - SPARK_DRIVER_MEM=4g  # Spark driver heap
+mem_limit: 8g            # container memory ceiling
+shm_size: 2g             # shared memory for Spark
+```
+
+Defaults (`4` cores, `4g` driver, `8g` container) match the tested configuration. On a larger machine, raise these for more speed. On a smaller one, the pipeline still runs but more slowly; if Spark reports an out-of-memory error, lower `SPARK_DRIVER_MEM` to `3g`.
+
 ---
 
 ## Expected Runtime
 
-Measured on the tested configuration (4 cores, 8GB RAM allocated to Docker,
-full December 2021 dataset):
+Measured on the tested configuration (4 cores, 8GB RAM allocated to Docker, full December 2021 dataset):
 
 | Phase | Description | Time |
 |---|---|---|
@@ -133,6 +149,4 @@ full December 2021 dataset):
 | Phase 3 | Trajectory visualization | <1 min |
 | **Total** | | **~26 min** |
 
-Runtime scales with the cores and memory allocated. A machine with more
-resources will complete faster; the figures above are a conservative reference
-from a deliberately modest 8GB configuration.
+Runtime scales with the cores and memory allocated. A machine with more resources will complete faster; the figures above are a conservative reference from a deliberately modest 8GB configuration.
