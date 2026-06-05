@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Large data files — not suitable for git
+data/
+
+# Generated directories
+cache/
+outputs/
+output/
+encounter_maps_fullday/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env

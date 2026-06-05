@@ -1,0 +1,17 @@
+# Data directories — too large to include in build context
+data/
+cache/
+outputs/
+output/
+encounter_maps_fullday/
+
+# Output files
+*.csv
+*.html
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Git
+.git/

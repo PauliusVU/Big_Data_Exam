@@ -1,0 +1,13 @@
+services:
+  ais-collision:
+    image: ais-collision-detection
+    container_name: ais_collision_detection
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+    environment:
+      - OUTPUT_DIR=/app/outputs
+      - SPARK_CORES=4
+      - SPARK_DRIVER_MEM=4g
+    mem_limit: 8g
+    shm_size: 2g

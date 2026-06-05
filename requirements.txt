@@ -1,0 +1,8 @@
+pyspark
+pandas
+geopandas
+osmium
+pygeohash
+shapely
+folium
+numpy
