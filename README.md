@@ -114,6 +114,7 @@ Replace `IMAGE_NAME` with:
 Results are written to `./outputs/` — candidate list, confirmed collisions, per-incident telemetry, and trajectory maps.
 
 **Alternative: Docker Compose.** From the repository root with the data files in place, build the image first (`docker build -t ais-collision-detection .`), then run `docker compose up`. It uses the settings in `docker-compose.yml`.
+
 ---
 
 ## Tuning for Your Machine
