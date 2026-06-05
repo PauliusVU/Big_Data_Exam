@@ -80,14 +80,20 @@ The prebuilt image is publicly available on Docker Hub: https://hub.docker.com/r
 
 ## Running the Pipeline
 
-1. Place the three data files in a `data/` directory (see Requirements).
-2. Pull the image:
+**Step 1 — Place the data files.** Put the three files (see Requirements) in a `data/` directory inside the project root.
 
+**Step 2 — Get the image.** Choose based on your machine's architecture:
+
+- **Apple Silicon (arm64):** pull the prebuilt image from Docker Hub:
 ```bash
-docker pull pauliusvu/ais-collision-detection:v1.0
+  docker pull pauliusvu/ais-collision-detection:v1.0
+```
+- **Intel / AMD (x86-64):** build it locally from the Dockerfile (the prebuilt image is arm64 and will not run natively on x86):
+```bash
+  docker build -t ais-collision-detection .
 ```
 
-3. From the directory containing `data/`, run:
+**Step 3 — Run.** From the directory containing `data/`:
 
 ```bash
 docker run \
@@ -98,28 +104,16 @@ docker run \
   --shm-size=2g \
   -v "$(pwd)/data:/app/data" \
   -v "$(pwd)/outputs:/app/outputs" \
-  pauliusvu/ais-collision-detection:v1.0
+  IMAGE_NAME
 ```
 
-Results are written to `./outputs/` (candidate list, confirmed collisions, per-incident telemetry, and trajectory maps).
+Replace `IMAGE_NAME` with:
+- `pauliusvu/ais-collision-detection:v1.0` if you pulled, or
+- `ais-collision-detection` if you built locally.
 
-Alternatively, from the repository root with the data files in place, `docker compose up` runs the same pipeline using the settings in `docker-compose.yml`.
+Results are written to `./outputs/` — candidate list, confirmed collisions, per-incident telemetry, and trajectory maps.
 
-**Architecture note.** The prebuilt image is **linux/arm64** (built on Apple Silicon). On an Intel/AMD (x86-64) machine, build locally instead of pulling, then run the same command with the local image name `ais-collision-detection`:
-
-```bash
-docker build -t ais-collision-detection .
-docker run \
-  -e SPARK_CORES=4 \
-  -e SPARK_DRIVER_MEM=4g \
-  -e OUTPUT_DIR=/app/outputs \
-  --memory=8g \
-  --shm-size=2g \
-  -v "$(pwd)/data:/app/data" \
-  -v "$(pwd)/outputs:/app/outputs" \
-  ais-collision-detection
-```
-
+**Alternative: Docker Compose.** From the repository root with the data files in place, build the image first (`docker build -t ais-collision-detection .`), then run `docker compose up`. It uses the settings in `docker-compose.yml`.
 ---
 
 ## Tuning for Your Machine
