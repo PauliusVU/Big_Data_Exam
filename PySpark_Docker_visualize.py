@@ -1,3 +1,11 @@
+# Trajectory Visualization
+#
+# Produces an interactive HTML map for each confirmed collision showing both
+# vessels' tracks over the ±10-minute window required by the assignment.
+# Folium is used rather than matplotlib because it renders to a self-contained
+# HTML file with no display server needed — suitable for headless Docker runs.
+# The output can be opened in any browser after the container exits.
+
 import os
 import math
 import pandas as pd
@@ -23,6 +31,10 @@ def haversine_m(lat1, lon1, lat2, lon2):
     return 2 * R * math.asin(math.sqrt(a))
 
 
+# Finds the closest pair of pings within ±60s of impact to place the collision
+# marker. Averaging the two vessel positions gives a midpoint between hulls,
+# which is a better marker location than either vessel's reported position alone
+# given AIS positional jitter of tens of metres.
 def find_collision_point(df_a, df_b, t_impact):
     # Finds the closest pair of pings within ±60s of impact to place the marker.
     window = pd.Timedelta(seconds=60)
@@ -47,6 +59,10 @@ def find_collision_point(df_a, df_b, t_impact):
     return col_lat, col_lon, min_dist
 
 
+# Pre-collision pings are rendered at full opacity, post-collision pings are
+# dimmed — making the moment of impact visually apparent on the map.
+# Pings within ±60s of impact are drawn slightly larger to highlight the
+# closest-approach cluster.
 def build_map(name_a, name_b, df_a, df_b, t_impact, col_lat, col_lon, min_dist):
     center_lat = (df_a['Latitude'].mean() + df_b['Latitude'].mean()) / 2
     center_lon = (df_a['Longitude'].mean() + df_b['Longitude'].mean()) / 2
@@ -120,6 +136,9 @@ def build_map(name_a, name_b, df_a, df_b, t_impact, col_lat, col_lon, min_dist):
     return m
 
 
+# Loads confirmed collisions from Phase 2 output and generates one map per
+# pair. Vessel telemetry is pre-indexed by MMSI (same pattern as Phase 2) so
+# each window lookup is a dictionary access rather than a full DataFrame scan.
 def run_visualization():
     print("=" * 65)
     print("  AIS COLLISION DETECTION — VISUALIZATION")
