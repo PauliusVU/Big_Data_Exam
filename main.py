@@ -3,8 +3,13 @@
 #   1. Phase 1 (PySpark) — 31-day collision candidate detection
 #   2. Phase 2 (Pandas)  — forensic verification of candidates
 #   3. Visualization     — trajectory maps for confirmed collisions
-
-# Each script can also be run independently:
+#
+# Each phase is launched as a subprocess rather than imported and called
+# directly. This keeps each phase's Spark session and memory footprint fully
+# isolated — a SparkSession started in Phase 1 would otherwise persist in
+# the same Python process and conflict with Phase 2's Pandas-only environment.
+# Subprocess isolation also means each phase can be re-run independently
+# without restarting the entire pipeline:
 #     python PySpark_Docker_Phase_1.py
 #     python PySpark_Docker_Phase_2.py
 #     python PySpark_Docker_visualize.py
@@ -24,6 +29,10 @@ OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '.')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
+# run() uses check=False rather than check=True so that we can print a
+# labelled failure message with elapsed time before exiting. check=True would
+# raise CalledProcessError immediately with no context about which phase failed
+# or how long it ran.
 def run(script, label):
     print(f"\n{'=' * 65}")
     print(f"  {label}")
@@ -40,6 +49,9 @@ def run(script, label):
     print(f"\n  {label} completed in {elapsed}")
 
 
+# Reads results from disk rather than accepting in-memory arguments — phases
+# run as isolated subprocesses with no shared state. The telemetry glob handles
+# both the Spark directory form (part-*.csv) and a flat CSV from local runs.
 def print_final_summary():
     final_csv     = os.path.join(OUTPUT_DIR, "FINAL_investigation_results.csv")
     telemetry_csv = os.path.join(OUTPUT_DIR, "clean_suspect_telemetry.csv")
